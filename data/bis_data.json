@@ -1,0 +1,10 @@
+{
+  "_comment": "This file will be populated by running parser.py",
+  "example": {
+    "specs": ["example_spec"],
+    "gear": {
+      "head": [12345],
+      "neck": [12346]
+    }
+  }
+}
