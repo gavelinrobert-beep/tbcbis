@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TBC BiS Exporter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #333;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .result.success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+        }
+
+        .result.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+
+        .result.info {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .data-preview {
+            margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            background: #f9f9f9;
+        }
+
+        .data-preview h3 {
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .item-card {
+            background: white;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border-left: 4px solid #667eea;
+        }
+
+        .item-card strong {
+            color: #667eea;
+        }
+
+        .help-text {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .divider {
+            height: 1px;
+            background: #e0e0e0;
+            margin: 25px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔥 TBC BiS Exporter</h1>
+            <p>Export Best-in-Slot gear data to Google Sheets</p>
+        </div>
+
+        <div class="card">
+            <h2 style="margin-bottom: 20px;">Select Class & Spec</h2>
+            
+            <div class="form-group">
+                <label for="class">Class</label>
+                <select id="class" onchange="updateSpecs()">
+                    <option value="">-- Select Class --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="spec">Specialization</label>
+                <select id="spec" disabled>
+                    <option value="">-- Select Spec --</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="phase">Phase</label>
+                <select id="phase">
+                    <option value="">All Phases</option>
+                    <option value="1">Phase 1</option>
+                    <option value="2">Phase 2</option>
+                    <option value="3">Phase 3</option>
+                    <option value="4">Phase 4</option>
+                    <option value="5">Phase 5</option>
+                    <option value="6">Phase 6</option>
+                </select>
+                <p class="help-text">Leave as "All Phases" to export all phases</p>
+            </div>
+
+            <div class="button-group">
+                <button onclick="fetchBiSData()">📋 Preview Data</button>
+                <button onclick="clearCache()">🗑️ Clear Cache</button>
+            </div>
+
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Loading data...</p>
+            </div>
+
+            <div class="result" id="result"></div>
+            <div class="data-preview" id="dataPreview" style="display: none;"></div>
+        </div>
+
+        <div class="card">
+            <h2 style="margin-bottom: 20px;">Export to Google Sheets</h2>
+            
+            <div class="form-group">
+                <label for="spreadsheetId">Spreadsheet ID</label>
+                <input type="text" id="spreadsheetId" placeholder="1a2b3c4d5e6f7g8h9i0j...">
+                <p class="help-text">Find this in your Google Sheets URL</p>
+            </div>
+
+            <div class="form-group">
+                <label for="worksheetName">Worksheet Name</label>
+                <input type="text" id="worksheetName" value="BiS Data" placeholder="BiS Data">
+                <p class="help-text">Name of the sheet tab (will be created if it doesn't exist)</p>
+            </div>
+
+            <button onclick="exportToSheets()">📤 Export to Google Sheets</button>
+
+            <div class="loading" id="exportLoading">
+                <div class="spinner"></div>
+                <p>Exporting to Google Sheets...</p>
+            </div>
+
+            <div class="result" id="exportResult"></div>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom: 10px;">ℹ️ Setup Instructions</h3>
+            <ol style="line-height: 1.8; padding-left: 20px;">
+                <li>Create a Google Cloud project and enable Google Sheets API</li>
+                <li>Create a service account and download the JSON key</li>
+                <li>Save the key as <code>service-account-key.json</code> in the project root</li>
+                <li>Share your Google Sheet with the service account email</li>
+                <li>Copy the spreadsheet ID from the URL (between /d/ and /edit)</li>
+                <li>Select class, spec, and phase, then click "Export to Google Sheets"</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        let classesData = {};
+
+        // Load classes on page load
+        window.onload = async () => {
+            try {
+                const response = await fetch('/api/classes');
+                const data = await response.json();
+                
+                if (data.success) {
+                    classesData = data.data.classes;
+                    populateClasses();
+                }
+            } catch (error) {
+                showResult('Error loading classes: ' + error.message, 'error');
+            }
+        };
+
+        function populateClasses() {
+            const classSelect = document.getElementById('class');
+            Object.keys(classesData).sort().forEach(className => {
+                const option = document.createElement('option');
+                option.value = className;
+                option.textContent = className.charAt(0).toUpperCase() + className.slice(1);
+                classSelect.appendChild(option);
+            });
+        }
+
+        function updateSpecs() {
+            const className = document.getElementById('class').value;
+            const specSelect = document.getElementById('spec');
+            
+            // Clear existing specs
+            specSelect.innerHTML = '<option value="">-- Select Spec --</option>';
+            
+            if (className && classesData[className]) {
+                specSelect.disabled = false;
+                classesData[className].forEach(spec => {
+                    const option = document.createElement('option');
+                    option.value = spec;
+                    option.textContent = spec.split('-').map(w => 
+                        w.charAt(0).toUpperCase() + w.slice(1)
+                    ).join(' ');
+                    specSelect.appendChild(option);
+                });
+            } else {
+                specSelect.disabled = true;
+            }
+        }
+
+        async function fetchBiSData() {
+            const className = document.getElementById('class').value;
+            const specName = document.getElementById('spec').value;
+            const phase = document.getElementById('phase').value;
+
+            if (!className || !specName) {
+                showResult('Please select both class and spec', 'error');
+                return;
+            }
+
+            showLoading(true);
+            hideResult();
+            document.getElementById('dataPreview').style.display = 'none';
+
+            try {
+                const url = phase 
+                    ? `/api/bis/${className}/${specName}/${phase}`
+                    : `/api/bis/${className}/${specName}`;
+                    
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.success) {
+                    showResult(`Loaded ${data.data.length} items`, 'success');
+                    displayDataPreview(data.data);
+                } else {
+                    showResult('Error: ' + data.error, 'error');
+                }
+            } catch (error) {
+                showResult('Error fetching data: ' + error.message, 'error');
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        function displayDataPreview(data) {
+            const preview = document.getElementById('dataPreview');
+            preview.style.display = 'block';
+            
+            let html = '<h3>📦 Data Preview</h3>';
+            
+            data.slice(0, 10).forEach(item => {
+                html += `
+                    <div class="item-card">
+                        <strong>${item.itemName}</strong><br>
+                        <small>
+                            ${item.class} - ${item.spec} | 
+                            Phase ${item.phase} | 
+                            Slot: ${item.slot}
+                        </small>
+                    </div>
+                `;
+            });
+            
+            if (data.length > 10) {
+                html += `<p style="text-align: center; color: #666; margin-top: 10px;">
+                    ... and ${data.length - 10} more items
+                </p>`;
+            }
+            
+            preview.innerHTML = html;
+        }
+
+        async function exportToSheets() {
+            const className = document.getElementById('class').value;
+            const specName = document.getElementById('spec').value;
+            const phase = document.getElementById('phase').value;
+            const spreadsheetId = document.getElementById('spreadsheetId').value.trim();
+            const worksheetName = document.getElementById('worksheetName').value.trim();
+
+            if (!className || !specName) {
+                showExportResult('Please select both class and spec', 'error');
+                return;
+            }
+
+            if (!spreadsheetId) {
+                showExportResult('Please enter a spreadsheet ID', 'error');
+                return;
+            }
+
+            showExportLoading(true);
+            hideExportResult();
+
+            try {
+                const response = await fetch('/api/export', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        className,
+                        specName,
+                        phase: phase || undefined,
+                        spreadsheetId,
+                        worksheetName: worksheetName || 'BiS Data'
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showExportResult('✅ ' + data.message, 'success');
+                } else {
+                    showExportResult('❌ ' + data.error, 'error');
+                }
+            } catch (error) {
+                showExportResult('❌ Error exporting: ' + error.message, 'error');
+            } finally {
+                showExportLoading(false);
+            }
+        }
+
+        async function clearCache() {
+            if (!confirm('Are you sure you want to clear the cache?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/cache', {
+                    method: 'DELETE'
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    showResult('✅ ' + data.message, 'success');
+                } else {
+                    showResult('❌ ' + data.error, 'error');
+                }
+            } catch (error) {
+                showResult('❌ Error clearing cache: ' + error.message, 'error');
+            }
+        }
+
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+
+        function showExportLoading(show) {
+            document.getElementById('exportLoading').style.display = show ? 'block' : 'none';
+        }
+
+        function showResult(message, type) {
+            const result = document.getElementById('result');
+            result.textContent = message;
+            result.className = 'result ' + type;
+            result.style.display = 'block';
+        }
+
+        function hideResult() {
+            document.getElementById('result').style.display = 'none';
+        }
+
+        function showExportResult(message, type) {
+            const result = document.getElementById('exportResult');
+            result.textContent = message;
+            result.className = 'result ' + type;
+            result.style.display = 'block';
+        }
+
+        function hideExportResult() {
+            document.getElementById('exportResult').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
