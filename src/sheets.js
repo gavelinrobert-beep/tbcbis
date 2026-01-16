@@ -178,8 +178,8 @@ class SheetsService {
       console.log(`Appended ${rows.length} rows to ${worksheetName}`);
       return {
         success: true,
-        rowsUpdated: response.data.updates.updatedRows,
-        range: response.data.updates.updatedRange
+        rowsUpdated: response.data?.updates?.updatedRows || 0,
+        range: response.data?.updates?.updatedRange || ''
       };
       
     } catch (error) {

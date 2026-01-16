@@ -94,7 +94,7 @@ class BiSScraper {
             itemLinks.forEach(link => {
               const href = link.href;
               const itemIdMatch = href.match(/item[=/](\d+)/);
-              if (itemIdMatch) {
+              if (itemIdMatch && itemIdMatch[1]) {
                 const itemId = itemIdMatch[1];
                 const itemName = link.textContent.trim() || link.getAttribute('data-wowhead') || 'Unknown Item';
                 

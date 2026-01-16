@@ -126,6 +126,7 @@ class Cache {
       const files = await fs.readdir(this.cacheDir);
       return files.filter(f => f.endsWith('.json')).map(f => f.replace('.json', ''));
     } catch (error) {
+      console.error('Error reading cache directory:', error);
       return [];
     }
   }

@@ -24,7 +24,8 @@ try {
   const keyPath = process.env.GOOGLE_SERVICE_ACCOUNT_KEY_PATH || './service-account-key.json';
   sheetsService = new SheetsService(keyPath);
 } catch (error) {
-  console.warn('Google Sheets service not configured:', error.message);
+  console.warn('Google Sheets service initialization failed:', error.message);
+  console.warn('To enable Google Sheets export, ensure service-account-key.json exists and is valid.');
 }
 
 const scraper = new BiSScraper(
